@@ -126,6 +126,10 @@
     margin-bottom: 16px;
   }
 
+  .chart-wrap canvas {
+    max-width: 100%;
+  }
+
   .empty-note {
     color: var(--ink-soft);
     font-size: 13.5px;
@@ -150,8 +154,8 @@
     padding: 7px 9px;
   }
 
-  .entry-row input[type="date"] { width: 148px; }
-  .entry-row input[type="number"] { width: 110px; }
+  .entry-row input[type="date"] { flex: 1 1 130px; min-width: 0; }
+  .entry-row input[type="number"] { flex: 1 1 90px; min-width: 0; }
 
   .entry-row button {
     font-family: 'DM Sans', sans-serif;
@@ -261,12 +265,12 @@
 
   /* Desktop: 2 columns x 3 rows */
   @media (min-width: 900px) {
-    #health-root { max-width: 900px; }
+    #health-root { max-width: 1420px; }
 
     #markers {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 4px 32px;
+      gap: 24px;
     }
 
     .marker {
