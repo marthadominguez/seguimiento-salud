@@ -3,6 +3,19 @@
 Este proyecto es independiente de Claude: tus datos viven en una base de datos
 de Cloudflare (KV) ligada a tu propia cuenta.
 
+## Estado actual
+
+Este proyecto ya está desplegado y funcionando:
+
+- **Tablero:** https://seguimiento-salud.pages.dev
+- **Proyecto de Pages:** `seguimiento-salud`
+- **KV namespace:** `salud_mld` (vinculado en `wrangler.toml` como `HEALTH_KV`)
+- **Clave de acceso:** configurada como secreto `API_KEY` en el proyecto
+
+No necesitas repetir la configuración inicial salvo que empieces desde una
+cuenta de Cloudflare nueva. Ve directo a "Actualizar el tablero en el futuro"
+más abajo.
+
 ## Estructura
 
 ```
@@ -17,7 +30,7 @@ wrangler.toml            → configuración de despliegue
 - Node.js instalado en tu computador
 - Wrangler (CLI de Cloudflare): se instala en el paso 1
 
-## Pasos
+## Configuración inicial (referencia — ya hecha en esta cuenta)
 
 ### 1. Instalar Wrangler y conectar tu cuenta
 
@@ -96,6 +109,21 @@ wrangler pages deploy public --project-name=seguimiento-salud
 
 Tus datos guardados no se pierden — viven en el KV namespace, separado del
 código.
+
+## Cambiar la clave de acceso
+
+```bash
+printf 'TU_NUEVA_CLAVE' | wrangler pages secret put API_KEY --project-name=seguimiento-salud
+```
+
+Usa `printf` (no `echo`) para no incluir un salto de línea al final del
+valor — un secreto con un salto de línea de más no coincide con lo que el
+navegador envía y la clave "correcta" aparece como incorrecta.
+
+⚠️ Los secretos y variables de entorno de Cloudflare Pages solo aplican a los
+despliegues hechos **después** de configurarlos. Si cambias la clave, corre
+también el comando de "Actualizar el tablero" de arriba para que el cambio
+tome efecto.
 
 ## Nota de seguridad
 
