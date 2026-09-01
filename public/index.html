@@ -261,10 +261,11 @@
     min-height: 16px;
   }
 
-  /* Tablet and below: single column (default block stacking above already handles this) */
+  /* Mobile landscape and below (up to ~932px on the largest phones): single
+     column (default block stacking above already handles this) */
 
   /* Desktop: 2 columns x 3 rows */
-  @media (min-width: 900px) {
+  @media (min-width: 1024px) {
     #health-root { max-width: 1420px; }
 
     #markers {
