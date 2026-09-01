@@ -1,76 +1,75 @@
-# Seguimiento de salud — despliegue en Cloudflare Pages
+# Health tracker — Cloudflare Pages deployment
 
-Este proyecto es independiente de Claude: tus datos viven en una base de datos
-de Cloudflare (KV) ligada a tu propia cuenta.
+This project is independent of Claude: your data lives in a Cloudflare
+database (KV) tied to your own account.
 
-## Estado actual
+## Current status
 
-Este proyecto ya está desplegado y funcionando:
+This project is already deployed and working:
 
-- **Tablero:** https://seguimiento-salud.pages.dev
-- **Proyecto de Pages:** `seguimiento-salud` (creado como "Direct Upload", sin
-  integración de Git nativa de Cloudflare — ver nota abajo)
-- **KV namespace:** `salud_mld` (vinculado en `wrangler.toml` como `HEALTH_KV`)
-- **Clave de acceso:** configurada como secreto `API_KEY` en el proyecto
-- **Despliegue automático:** un workflow de GitHub Actions
-  (`.github/workflows/deploy.yml`) despliega a Cloudflare Pages cada vez que
-  se hace push a `main`
+- **Dashboard:** https://seguimiento-salud.pages.dev
+- **Pages project:** `seguimiento-salud` (created as "Direct Upload", without
+  Cloudflare's native Git integration — see note below)
+- **KV namespace:** `salud_mld` (bound in `wrangler.toml` as `HEALTH_KV`)
+- **Access key:** configured as the `API_KEY` secret on the project
+- **Automatic deployment:** a GitHub Actions workflow
+  (`.github/workflows/deploy.yml`) deploys to Cloudflare Pages every time
+  there's a push to `main`
 
-No necesitas repetir la configuración inicial salvo que empieces desde una
-cuenta de Cloudflare nueva. Ve directo a "Actualizar el tablero en el futuro"
-más abajo.
+You don't need to repeat the initial setup unless you're starting from a
+new Cloudflare account. Skip straight to "Updating the dashboard in the
+future" below.
 
-### Nota sobre Git integration nativa de Cloudflare
+### Note on Cloudflare's native Git integration
 
-Intencionalmente **no** se usó la opción "Connect to Git" del dashboard de
-Cloudflare: en la versión actual del dashboard, esa opción crea un proyecto
-de tipo Worker (Workers Builds) en vez de un proyecto clásico de Pages, y el
-comando de build por defecto (`wrangler deploy`) no sabe manejar la carpeta
-`functions/` ni `pages_build_output_dir` de este proyecto. Por eso el
-despliegue automático se hace con un workflow propio de GitHub Actions en
-vez de la integración nativa.
+The "Connect to Git" option in the Cloudflare dashboard was intentionally
+**not** used: in the current version of the dashboard, that option creates a
+Worker-type project (Workers Builds) instead of a classic Pages project, and
+the default build command (`wrangler deploy`) doesn't know how to handle this
+project's `functions/` folder or `pages_build_output_dir`. That's why
+automatic deployment is done with a custom GitHub Actions workflow instead of
+the native integration.
 
-## Estructura
+## Structure
 
 ```
-public/index.html        → el tablero (frontend)
-functions/api/storage.js → la función que guarda/lee los datos (backend)
-wrangler.toml            → configuración de despliegue
+public/index.html        → the dashboard (frontend)
+functions/api/storage.js → the function that saves/reads data (backend)
+wrangler.toml            → deployment configuration
 ```
 
-## Requisitos
+## Requirements
 
-- Cuenta gratuita de Cloudflare: https://dash.cloudflare.com/sign-up
-- Node.js instalado en tu computador
-- Wrangler (CLI de Cloudflare): se instala en el paso 1
+- Free Cloudflare account: https://dash.cloudflare.com/sign-up
+- Node.js installed on your computer
+- Wrangler (Cloudflare CLI): installed in step 1
 
-## Configuración inicial (referencia — ya hecha en esta cuenta)
+## Initial setup (reference — already done on this account)
 
-### 1. Instalar Wrangler y conectar tu cuenta
+### 1. Install Wrangler and connect your account
 
 ```bash
 npm install -g wrangler
 wrangler login
 ```
 
-Esto abre el navegador para autorizar tu cuenta de Cloudflare.
+This opens your browser to authorize your Cloudflare account.
 
-### 2. Elegir tu clave de acceso
+### 2. Choose your access key
 
-Piensa una clave (como una contraseña) que vas a usar para entrar al tablero
-desde cualquier dispositivo. Guárdala en un lugar seguro (un gestor de
-contraseñas), la necesitarás en el paso 5 y cada vez que entres desde un
-dispositivo nuevo.
+Think of a key (like a password) you'll use to access the dashboard from any
+device. Save it somewhere secure (a password manager) — you'll need it in
+step 5 and every time you log in from a new device.
 
-### 3. Crear la base de datos (KV namespace)
+### 3. Create the database (KV namespace)
 
-Desde la carpeta del proyecto:
+From the project folder:
 
 ```bash
 wrangler kv namespace create HEALTH_KV
 ```
 
-Esto imprime algo como:
+This prints something like:
 
 ```
 [[kv_namespaces]]
@@ -78,91 +77,90 @@ binding = "HEALTH_KV"
 id = "abcd1234..."
 ```
 
-Copia esas 3 líneas y pégalas al final de `wrangler.toml`, reemplazando el
-bloque comentado que ya está ahí.
+Copy those 3 lines and paste them at the end of `wrangler.toml`, replacing
+the commented-out block that's already there.
 
-### 4. Crear el proyecto de Pages
+### 4. Create the Pages project
 
 ```bash
 wrangler pages project create seguimiento-salud
 ```
 
-Elige la región/ajustes por defecto cuando te pregunte.
+Choose the default region/settings when prompted.
 
-### 5. Configurar tu clave de acceso como secreto
+### 5. Set your access key as a secret
 
 ```bash
 wrangler pages secret put API_KEY --project-name=seguimiento-salud
 ```
 
-Te va a pedir el valor: pega la clave que elegiste en el paso 2.
+It will ask for the value: paste the key you chose in step 2.
 
-### 6. Desplegar
+### 6. Deploy
 
 ```bash
 wrangler pages deploy public --project-name=seguimiento-salud
 ```
 
-Al terminar te da una URL tipo `https://seguimiento-salud.pages.dev` — esa es
-tu tablero, ya accesible desde cualquier PC o celular.
+When it finishes it gives you a URL like `https://seguimiento-salud.pages.dev`
+— that's your dashboard, now accessible from any PC or phone.
 
-### 7. Entrar por primera vez
+### 7. Log in for the first time
 
-Abre la URL, ingresa la clave de acceso que elegiste. El navegador la recuerda
-localmente para que no la pidas cada vez en ese mismo dispositivo (pero sí la
-primera vez en cada dispositivo nuevo).
+Open the URL, enter the access key you chose. The browser remembers it
+locally so you won't be asked for it again on that same device (but you will
+the first time on each new device).
 
-## Actualizar el tablero en el futuro
+## Updating the dashboard in the future
 
-Si quieres cambiar algo del diseño o agregar un marcador nuevo, edita
-`public/index.html`, haz commit y push a `main`:
+If you want to change the design or add a new marker, edit
+`public/index.html`, commit, and push to `main`:
 
 ```bash
 git add -A
-git commit -m "tu mensaje"
+git commit -m "your message"
 git push origin main
 ```
 
-GitHub Actions despliega automáticamente a Cloudflare Pages en cada push
-(revisa la pestaña "Actions" del repo para ver el progreso). Si necesitas
-desplegar manualmente sin pasar por GitHub, también puedes correr:
+GitHub Actions automatically deploys to Cloudflare Pages on every push
+(check the "Actions" tab of the repo to see progress). If you need to deploy
+manually without going through GitHub, you can also run:
 
 ```bash
 wrangler pages deploy public --project-name=seguimiento-salud
 ```
 
-Tus datos guardados no se pierden — viven en el KV namespace, separado del
-código.
+Your saved data isn't lost — it lives in the KV namespace, separate from the
+code.
 
-### Configurar el despliegue automático (una sola vez)
+### Setting up automatic deployment (one time only)
 
-El workflow de GitHub Actions necesita dos secretos del repo (Settings →
+The GitHub Actions workflow needs two repo secrets (Settings →
 Secrets and variables → Actions → New repository secret):
 
-- `CLOUDFLARE_API_TOKEN` — un token creado en
-  https://dash.cloudflare.com/profile/api-tokens con permiso
-  "Account → Cloudflare Pages → Edit" (puedes usar la plantilla "Edit
-  Cloudflare Workers" o crear uno custom).
+- `CLOUDFLARE_API_TOKEN` — a token created at
+  https://dash.cloudflare.com/profile/api-tokens with "Account → Cloudflare
+  Pages → Edit" permission (you can use the "Edit Cloudflare Workers"
+  template or create a custom one).
 - `CLOUDFLARE_ACCOUNT_ID` — `8955f80093107f6b7ef8307ab22608a6`
 
-## Cambiar la clave de acceso
+## Changing the access key
 
 ```bash
-printf 'TU_NUEVA_CLAVE' | wrangler pages secret put API_KEY --project-name=seguimiento-salud
+printf 'YOUR_NEW_KEY' | wrangler pages secret put API_KEY --project-name=seguimiento-salud
 ```
 
-Usa `printf` (no `echo`) para no incluir un salto de línea al final del
-valor — un secreto con un salto de línea de más no coincide con lo que el
-navegador envía y la clave "correcta" aparece como incorrecta.
+Use `printf` (not `echo`) to avoid including a trailing newline in the
+value — a secret with an extra trailing newline won't match what the browser
+sends, and the "correct" key will appear to be wrong.
 
-⚠️ Los secretos y variables de entorno de Cloudflare Pages solo aplican a los
-despliegues hechos **después** de configurarlos. Si cambias la clave, corre
-también el comando de "Actualizar el tablero" de arriba para que el cambio
-tome efecto.
+⚠️ Cloudflare Pages secrets and environment variables only apply to
+deployments made **after** they're configured. If you change the key, also
+run the "Updating the dashboard" command above so the change takes effect.
 
-## Nota de seguridad
+## Security note
 
-Esto usa una clave compartida simple, suficiente para uso personal. Si en
-algún momento quieres algo más robusto (login con correo, múltiples
-usuarios), se puede migrar a Cloudflare Access o a un proveedor como
-Supabase/Firebase — avísame si llegas a ese punto.
+This uses a simple shared key, which is sufficient for personal use. If at
+some point you want something more robust (email login, multiple users), it
+can be migrated to Cloudflare Access or a provider like Supabase/Firebase —
+let me know if you get to that point.
