@@ -1,0 +1,528 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+  :root {
+    --paper: #FCFCFC;
+    --paper-line: #DCEEF3;
+    --ink: #1C415A;
+    --ink-soft: #5C7A8C;
+    --navy: #1C415A;
+    --accent: #55B2D2;
+    --accent-light: #73C8DF;
+    --accent-bg: #EBFBFF;
+    --green: #3F6C51;
+    --green-bg: #E7EFE7;
+    --rust: #B5502D;
+    --rust-bg: #F5E4DB;
+    --amber: #93691F;
+    --amber-bg: #F3ECD8;
+  }
+
+  * { box-sizing: border-box; }
+
+  #health-root {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 28px 80px;
+    line-height: 1.5;
+  }
+
+  #health-root h1 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    color: #FCFCFC;
+  }
+
+  #health-root h1 .accent { color: var(--accent-light); }
+
+  .hero {
+    background: var(--navy);
+    border-radius: 28px;
+    padding: 34px 32px;
+    margin-bottom: 34px;
+  }
+
+  .subtitle {
+    color: #C9DEE7;
+    font-size: 14px;
+    margin: 0;
+    max-width: 62ch;
+  }
+
+  .marker {
+    border-top: 1px solid var(--paper-line);
+    padding: 26px 0 30px;
+  }
+
+  .marker:last-child { border-bottom: 1px solid var(--paper-line); }
+
+  .marker-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .marker-head h2 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .marker-head .range {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .marker-current {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .marker-current .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .marker-current .value .unit {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-left: 4px;
+  }
+
+  .status-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+
+  .status-normal { color: var(--green); background: var(--green-bg); }
+  .status-fuera  { color: var(--rust); background: var(--rust-bg); }
+  .status-medio  { color: var(--amber); background: var(--amber-bg); }
+  .status-none   { color: var(--ink-soft); background: var(--accent-bg); }
+
+  .chart-wrap {
+    height: 130px;
+    margin-bottom: 16px;
+  }
+
+  .empty-note {
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+
+  .entry-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .entry-row input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    border: 1px solid var(--paper-line);
+    background: #FFFEFB;
+    color: var(--ink);
+    border-radius: 3px;
+    padding: 7px 9px;
+  }
+
+  .entry-row input[type="date"] { width: 148px; }
+  .entry-row input[type="number"] { width: 110px; }
+
+  .entry-row button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 18px;
+    cursor: pointer;
+  }
+
+  .entry-row button:hover { background: var(--navy); }
+
+  .history {
+    margin-top: 14px;
+  }
+
+  .history-toggle {
+    font-size: 12.5px;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  .history-list {
+    margin-top: 10px;
+    display: none;
+  }
+
+  .history-list.open { display: block; }
+
+  .history-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--paper-line);
+  }
+
+  .history-row .del {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--rust);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .save-status {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    min-height: 14px;
+  }
+
+  #lock-screen {
+    max-width: 340px;
+    margin: 80px auto;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  #lock-screen h2 {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  #lock-screen input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--paper-line);
+    border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 10px;
+  }
+
+  #lock-screen button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #lock-error {
+    color: var(--rust);
+    font-size: 13px;
+    margin-top: 8px;
+    min-height: 16px;
+  }
+</style>
+
+<div id="lock-screen">
+  <h2>Seguimiento de salud</h2>
+  <p style="color:var(--ink-soft); font-size:13.5px; margin-bottom:16px;">Ingresa tu clave de acceso.</p>
+  <input type="password" id="lock-input" placeholder="Clave de acceso">
+  <button id="lock-submit">Entrar</button>
+  <div id="lock-error"></div>
+</div>
+
+<div id="health-root" style="display:none;">
+  <div class="hero">
+    <h1>Seguimiento de <span class="accent">salud</span></h1>
+    <p class="subtitle">Hierro, ferritina, insulina, hemoglobina glicosilada, vitamina D25 y peso &mdash; con rangos de referencia generales. Estos rangos varían según el laboratorio; esto no reemplaza la lectura de tu médico.</p>
+  </div>
+  <div id="markers"></div>
+</div>
+
+<script>
+(function () {
+  const MARKERS = [
+    { id: 'hierro', name: 'Hierro sérico', unit: 'µg/dL', low: 50, high: 170,
+      seed: [{ date: '2026-08-01', value: 42 }] },
+    { id: 'ferritina', name: 'Ferritina', unit: 'ng/mL', low: 15, high: 150,
+      seed: [{ date: '2026-08-01', value: 6.65 }] },
+    { id: 'vitd', name: 'Vitamina D25 (25-OH)', unit: 'ng/mL', low: 30, high: 100,
+      seed: [{ date: '2026-08-01', value: 27 }],
+      tiers: [ { max: 20, label: 'Deficiente', cls: 'status-fuera' },
+               { max: 30, label: 'Insuficiente', cls: 'status-medio' },
+               { max: Infinity, label: 'Suficiente', cls: 'status-normal' } ] },
+    { id: 'insulina', name: 'Insulina en ayunas', unit: 'µUI/mL', low: 2.6, high: 24.9,
+      seed: [] },
+    { id: 'hba1c', name: 'Hemoglobina glicosilada (HbA1c)', unit: '%', low: 0, high: 5.7,
+      seed: [],
+      tiers: [ { max: 5.7, label: 'Normal', cls: 'status-normal' },
+               { max: 6.5, label: 'Elevada', cls: 'status-medio' },
+               { max: Infinity, label: 'Alta', cls: 'status-fuera' } ] },
+    { id: 'peso', name: 'Peso', unit: 'kg', low: null, high: null,
+      seed: [{ date: '2026-08-22', value: 57.9 }] },
+  ];
+
+  // ---- Auth / clave de acceso ----
+  // La clave se guarda en localStorage de ESTE dispositivo únicamente para no
+  // pedirla cada vez; la clave real vive en el servidor (variable API_KEY).
+  let apiKey = localStorage.getItem('health_api_key') || '';
+
+  const lockScreen = document.getElementById('lock-screen');
+  const healthRoot = document.getElementById('health-root');
+  const lockInput = document.getElementById('lock-input');
+  const lockError = document.getElementById('lock-error');
+
+  async function tryUnlock(key) {
+    try {
+      const res = await fetch('/api/storage?prefix=labs:', {
+        headers: { Authorization: 'Bearer ' + key },
+      });
+      return res.status !== 401;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  document.getElementById('lock-submit').addEventListener('click', async () => {
+    const key = lockInput.value.trim();
+    lockError.textContent = 'Verificando...';
+    const ok = await tryUnlock(key);
+    if (ok) {
+      apiKey = key;
+      localStorage.setItem('health_api_key', key);
+      lockScreen.style.display = 'none';
+      healthRoot.style.display = 'block';
+      boot();
+    } else {
+      lockError.textContent = 'Clave incorrecta.';
+    }
+  });
+
+  // ---- Storage API (reemplaza window.storage de Claude) ----
+  const storage = {
+    async get(key) {
+      const res = await fetch('/api/storage?key=' + encodeURIComponent(key), {
+        headers: { Authorization: 'Bearer ' + apiKey },
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('storage get failed');
+      return res.json();
+    },
+    async set(key, value) {
+      const res = await fetch('/api/storage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
+        body: JSON.stringify({ key, value }),
+      });
+      if (!res.ok) throw new Error('storage set failed');
+      return res.json();
+    },
+  };
+
+  const root = document.getElementById('markers');
+  const charts = {};
+
+  function statusFor(marker, value) {
+    if (marker.tiers) {
+      const t = marker.tiers.find(t => value <= t.max);
+      return t ? { label: t.label, cls: t.cls } : { label: '—', cls: 'status-none' };
+    }
+    if (marker.low == null || marker.high == null) return { label: '', cls: 'status-none' };
+    if (value < marker.low) return { label: 'Bajo', cls: 'status-fuera' };
+    if (value > marker.high) return { label: 'Alto', cls: 'status-fuera' };
+    return { label: 'Normal', cls: 'status-normal' };
+  }
+
+  function fmtDate(d) {
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  async function loadEntries(marker) {
+    try {
+      const res = await storage.get('labs:' + marker.id);
+      if (res && res.value) return JSON.parse(res.value);
+    } catch (e) { /* not found yet */ }
+    if (marker.seed.length) {
+      await saveEntries(marker.id, marker.seed);
+      return marker.seed.slice();
+    }
+    return [];
+  }
+
+  async function saveEntries(id, entries) {
+    entries.sort((a, b) => a.date.localeCompare(b.date));
+    try {
+      await storage.set('labs:' + id, JSON.stringify(entries));
+    } catch (e) {
+      console.error('Storage error', e);
+    }
+  }
+
+  function render(marker, entries) {
+    const section = document.createElement('section');
+    section.className = 'marker';
+
+    const rangeText = marker.tiers
+      ? marker.tiers.map(t => t.label).join(' / ')
+      : (marker.low != null ? `rango: ${marker.low}\u2013${marker.high} ${marker.unit}` : '');
+
+    const last = entries[entries.length - 1];
+    const st = last ? statusFor(marker, last.value) : { label: '', cls: 'status-none' };
+
+    section.innerHTML = `
+      <div class="marker-head">
+        <h2>${marker.name}</h2>
+        <span class="range">${rangeText}</span>
+      </div>
+      <div class="marker-current">
+        ${last
+          ? `<span class="value">${last.value}<span class="unit">${marker.unit}</span></span>
+             <span class="status-pill ${st.cls}">${st.label || fmtDate(last.date)}</span>`
+          : `<span class="status-pill status-none">Sin datos aún</span>`}
+      </div>
+      ${entries.length ? `<div class="chart-wrap"><canvas></canvas></div>`
+                        : `<p class="empty-note">Agrega tu primer valor abajo para empezar a ver tendencia.</p>`}
+      <div class="entry-row">
+        <input type="date" class="input-date" value="${new Date().toISOString().slice(0,10)}">
+        <input type="number" step="0.01" class="input-value" placeholder="valor">
+        <button class="btn-save">Guardar valor</button>
+      </div>
+      <div class="save-status"></div>
+      ${entries.length ? `
+        <div class="history">
+          <button class="history-toggle">Ver historial (${entries.length})</button>
+          <div class="history-list"></div>
+        </div>` : ''}
+    `;
+
+    root.appendChild(section);
+
+    if (entries.length) {
+      const canvas = section.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      charts[marker.id] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: entries.map(e => fmtDate(e.date)),
+          datasets: [{
+            data: entries.map(e => e.value),
+            borderColor: '#1C415A',
+            backgroundColor: 'rgba(28,65,90,0.08)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#1C415A',
+            fill: true,
+            tension: 0.25,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#5C7A8C' }, grid: { display: false } },
+            y: { ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#5C7A8C' }, grid: { color: '#DCEEF3' } }
+          }
+        }
+      });
+
+      const toggle = section.querySelector('.history-toggle');
+      const list = section.querySelector('.history-list');
+      function renderHistory() {
+        list.innerHTML = entries.slice().reverse().map((e, revIdx) => {
+          const idx = entries.length - 1 - revIdx;
+          return `<div class="history-row">
+            <span>${fmtDate(e.date)} — ${e.value} ${marker.unit}</span>
+            <button class="del" data-idx="${idx}">quitar</button>
+          </div>`;
+        }).join('');
+        list.querySelectorAll('.del').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            entries.splice(Number(btn.dataset.idx), 1);
+            await saveEntries(marker.id, entries);
+            section.remove();
+            render(marker, entries);
+          });
+        });
+      }
+      renderHistory();
+      toggle.addEventListener('click', () => list.classList.toggle('open'));
+    }
+
+    const saveBtn = section.querySelector('.btn-save');
+    const statusEl = section.querySelector('.save-status');
+    saveBtn.addEventListener('click', async () => {
+      const dateVal = section.querySelector('.input-date').value;
+      const numVal = parseFloat(section.querySelector('.input-value').value);
+      if (!dateVal || isNaN(numVal)) {
+        statusEl.textContent = 'Ingresa fecha y valor válidos.';
+        return;
+      }
+      entries.push({ date: dateVal, value: numVal });
+      saveBtn.disabled = true;
+      statusEl.textContent = 'Guardando...';
+      await saveEntries(marker.id, entries);
+      statusEl.textContent = 'Guardado.';
+      section.remove();
+      render(marker, entries);
+    });
+  }
+
+  async function boot() {
+    root.innerHTML = '';
+    for (const marker of MARKERS) {
+      const entries = await loadEntries(marker);
+      render(marker, entries);
+    }
+  }
+
+  // Si ya guardamos la clave en este dispositivo, intenta entrar directo.
+  (async function start() {
+    if (apiKey) {
+      const ok = await tryUnlock(apiKey);
+      if (ok) {
+        lockScreen.style.display = 'none';
+        healthRoot.style.display = 'block';
+        boot();
+        return;
+      }
+    }
+    lockScreen.style.display = 'block';
+  })();
+})();
+</script>
