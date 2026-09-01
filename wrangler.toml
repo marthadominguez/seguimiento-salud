@@ -2,7 +2,6 @@ name = "seguimiento-salud"
 compatibility_date = "2026-08-31"
 pages_build_output_dir = "public"
 
-# Se completa automáticamente al crear el namespace (paso 3 del README)
-# [[kv_namespaces]]
-# binding = "HEALTH_KV"
-# id = "PON_AQUI_EL_ID_QUE_TE_DE_WRANGLER"
+[[kv_namespaces]]
+binding = "HEALTH_KV"
+id = "d134839094e04986ae9a75fe227b7125"
