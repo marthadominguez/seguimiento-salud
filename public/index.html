@@ -1,3 +1,4 @@
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231C415A'/%3E%3Cpath d='M4 17h5l2-6 4 11 3-8 2 3h8' stroke='%2373C8DF' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -254,6 +255,27 @@
     font-size: 13px;
     margin-top: 8px;
     min-height: 16px;
+  }
+
+  /* Tablet and below: single column (default block stacking above already handles this) */
+
+  /* Desktop: 2 columns x 3 rows */
+  @media (min-width: 900px) {
+    #health-root { max-width: 900px; }
+
+    #markers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px 32px;
+    }
+
+    .marker {
+      border: 1px solid var(--paper-line);
+      border-radius: 18px;
+      padding: 22px 24px 26px;
+    }
+
+    .marker:last-child { border-bottom: 1px solid var(--paper-line); }
   }
 </style>
 
