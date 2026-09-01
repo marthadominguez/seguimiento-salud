@@ -8,13 +8,27 @@ de Cloudflare (KV) ligada a tu propia cuenta.
 Este proyecto ya está desplegado y funcionando:
 
 - **Tablero:** https://seguimiento-salud.pages.dev
-- **Proyecto de Pages:** `seguimiento-salud`
+- **Proyecto de Pages:** `seguimiento-salud` (creado como "Direct Upload", sin
+  integración de Git nativa de Cloudflare — ver nota abajo)
 - **KV namespace:** `salud_mld` (vinculado en `wrangler.toml` como `HEALTH_KV`)
 - **Clave de acceso:** configurada como secreto `API_KEY` en el proyecto
+- **Despliegue automático:** un workflow de GitHub Actions
+  (`.github/workflows/deploy.yml`) despliega a Cloudflare Pages cada vez que
+  se hace push a `main`
 
 No necesitas repetir la configuración inicial salvo que empieces desde una
 cuenta de Cloudflare nueva. Ve directo a "Actualizar el tablero en el futuro"
 más abajo.
+
+### Nota sobre Git integration nativa de Cloudflare
+
+Intencionalmente **no** se usó la opción "Connect to Git" del dashboard de
+Cloudflare: en la versión actual del dashboard, esa opción crea un proyecto
+de tipo Worker (Workers Builds) en vez de un proyecto clásico de Pages, y el
+comando de build por defecto (`wrangler deploy`) no sabe manejar la carpeta
+`functions/` ni `pages_build_output_dir` de este proyecto. Por eso el
+despliegue automático se hace con un workflow propio de GitHub Actions en
+vez de la integración nativa.
 
 ## Estructura
 
@@ -101,7 +115,17 @@ primera vez en cada dispositivo nuevo).
 ## Actualizar el tablero en el futuro
 
 Si quieres cambiar algo del diseño o agregar un marcador nuevo, edita
-`public/index.html` y vuelve a correr:
+`public/index.html`, haz commit y push a `main`:
+
+```bash
+git add -A
+git commit -m "tu mensaje"
+git push origin main
+```
+
+GitHub Actions despliega automáticamente a Cloudflare Pages en cada push
+(revisa la pestaña "Actions" del repo para ver el progreso). Si necesitas
+desplegar manualmente sin pasar por GitHub, también puedes correr:
 
 ```bash
 wrangler pages deploy public --project-name=seguimiento-salud
@@ -109,6 +133,17 @@ wrangler pages deploy public --project-name=seguimiento-salud
 
 Tus datos guardados no se pierden — viven en el KV namespace, separado del
 código.
+
+### Configurar el despliegue automático (una sola vez)
+
+El workflow de GitHub Actions necesita dos secretos del repo (Settings →
+Secrets and variables → Actions → New repository secret):
+
+- `CLOUDFLARE_API_TOKEN` — un token creado en
+  https://dash.cloudflare.com/profile/api-tokens con permiso
+  "Account → Cloudflare Pages → Edit" (puedes usar la plantilla "Edit
+  Cloudflare Workers" o crear uno custom).
+- `CLOUDFLARE_ACCOUNT_ID` — `8955f80093107f6b7ef8307ab22608a6`
 
 ## Cambiar la clave de acceso
 
