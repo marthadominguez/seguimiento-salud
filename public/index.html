@@ -13,7 +13,7 @@
 
 <style>
   :root {
-    --paper: #FCFCFC;
+    --paper: #F5F9FA;
     --paper-line: #DCEEF3;
     --ink: #1C415A;
     --ink-soft: #5C7A8C;
@@ -61,22 +61,23 @@
     border-radius: 28px;
     padding: 34px 32px;
     margin-bottom: 34px;
+    max-width: 80rem;
+    margin: 0 auto;
   }
 
   .subtitle {
     color: #C9DEE7;
-    font-size: 14px;
+    font-size: 16px;
     margin: 0;
     max-width: 62ch;
   }
 
   .marker {
-    border-top: 1px solid var(--paper-line);
-    padding: 26px 0 30px;
-    background-color: #FFFFFF;
+    border: 1px solid var(--paper-line);
+    border-radius: 18px;
+    padding: 26px 24px 30px;
+    background-color: white;
   }
-
-  .marker:last-child { border-bottom: 1px solid var(--paper-line); }
 
   .marker-head {
     display: flex;
@@ -283,16 +284,9 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 24px;
+      max-width: 80rem;
+      margin: 0 auto;
     }
-
-    .marker {
-      border: 1px solid var(--paper-line);
-      border-radius: 18px;
-      padding: 22px 24px 26px;
-      background-color: white;
-    }
-
-    .marker:last-child { border-bottom: 1px solid var(--paper-line); }
   }
 </style>
 
@@ -315,7 +309,7 @@
 <script>
 (function () {
   const MARKERS = [
-    { id: 'hierro', name: 'Hierro sérico', unit: 'µg/dL', low: 50, high: 170,
+    { id: 'hierro', name: 'Hierro sérico', unit: 'µg/dL', low: 40, high: 170,
       seed: [{ date: '2026-08-01', value: 42 }] },
     { id: 'ferritina', name: 'Ferritina', unit: 'ng/mL', low: 15, high: 150,
       seed: [{ date: '2026-08-01', value: 6.65 }] },
