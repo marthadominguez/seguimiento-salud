@@ -429,12 +429,18 @@
     const section = document.createElement('section');
     section.className = 'marker';
 
-    const rangeText = marker.tiers
+    let rangeText = marker.tiers
       ? marker.tiers.map(t => t.label).join(' / ')
       : (marker.low != null ? `rango: ${marker.low}\u2013${marker.high} ${marker.unit}` : '');
 
     const last = entries[entries.length - 1];
     const st = last ? statusFor(marker, last.value) : { label: '', cls: 'status-none' };
+
+    if (marker.id === 'peso' && last) {
+      const maxVal = Math.max(...entries.map(e => e.value));
+      const diff = maxVal - last.value;
+      rangeText = `${diff.toFixed(1)} ${marker.unit} perdidos`;
+    }
 
     section.innerHTML = `
       <div class="marker-head">
