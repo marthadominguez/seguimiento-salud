@@ -164,7 +164,8 @@
     background: #FFFEFB;
     color: var(--ink);
     border-radius: 3px;
-    padding: 7px 9px;
+    height: 36px;
+    padding: 0 9px;
   }
 
   .entry-row input[type="date"] { flex: 1 1 130px; min-width: 0; }
@@ -275,7 +276,12 @@
   }
 
   /* Mobile landscape and below (up to ~932px on the largest phones): single
-     column (default block stacking above already handles this) */
+     column */
+  #markers {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
 
   /* Desktop: 2 columns x 3 rows */
   @media (min-width: 1024px) {
